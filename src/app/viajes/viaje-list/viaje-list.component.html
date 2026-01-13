@@ -1,0 +1,39 @@
+@let viajes = viajes$ | async;
+
+<p-card class="viaje-list-card">
+
+  <!-- Header -->
+  <div class="header">
+    <h2>Viajes</h2>
+
+    <button pButton label="Nuevo viaje" icon="pi pi-plus" routerLink="/viajes/nuevo">
+    </button>
+  </div>
+
+  <!-- Estado vacío -->
+  @if (!loading && viajes?.length === 0) {
+  <p class="empty">
+    No hay viajes creados aún.
+  </p>
+  }
+
+  <!-- Listado -->
+  <div class="viajes-list">
+    @for (v of viajes; track v.id) {
+    <a class="viaje-item" [routerLink]="['/viajes', v.id]">
+      <div class="viaje-main">
+        <span class="nombre">{{ v.nombre }}</span>
+        <span class="fechas">
+          {{ v.fechaInicio }} → {{ v.fechaFin }}
+        </span>
+      </div>
+
+      <div class="viaje-meta">
+        <span class="moneda">{{ v.monedaBase }}</span>
+        <i class="pi pi-chevron-right"></i>
+      </div>
+    </a>
+    }
+  </div>
+
+</p-card>

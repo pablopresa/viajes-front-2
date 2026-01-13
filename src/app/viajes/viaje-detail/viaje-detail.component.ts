@@ -1,0 +1,73 @@
+import { CommonModule } from "@angular/common";
+import { ChangeDetectionStrategy, Component, DestroyRef, inject } from "@angular/core";
+import { ActivatedRoute, RouterModule } from "@angular/router";
+import { switchMap, filter, map } from "rxjs/operators";
+import { ViajeService } from "../../core/services/viaje.service";
+import { ItinerarioItem } from "../../core/models/itinerario-item";
+import { Observable } from "rxjs";
+import { ButtonModule } from "primeng/button";
+import { CardModule } from "primeng/card";
+import { Viaje } from "../../core/models/viaje.model";
+
+@Component({
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    CardModule,
+    ButtonModule
+  ],
+  templateUrl: './viaje-detail.component.html',
+  styleUrls: ['./viaje-detail.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class ViajeDetailComponent {
+
+  viaje$!: Observable<Viaje>;
+  itinerarioItems$!: Observable<ItinerarioItem[]>;
+
+  constructor(
+    private route: ActivatedRoute,
+    private viajeService: ViajeService
+  ) {}
+
+  ngOnInit(): void {
+    const viajeId$ = this.route.paramMap.pipe(
+      map(p => Number(p.get('id'))),
+      filter(id => !isNaN(id))
+    );
+
+    this.viaje$ = viajeId$.pipe(
+      switchMap(id => this.viajeService.obtenerViaje(id))
+    );
+  
+    this.itinerarioItems$ = this.viaje$.pipe(
+      map(v => this.mapItinerario(v.itinerario))
+    );
+  }
+  
+  private mapItinerario(itinerario: any): ItinerarioItem[] {
+    const actividades = itinerario.actividades.map((a: any) => ({
+      id: a.id,
+      tipo: 'ACTIVIDAD',
+      nombre: a.nombre,
+      inicio: new Date(a.horaInicio),
+      fin: new Date(a.horaFin),
+      duracionMinutos: a.duracionMinutos
+    }));
+
+    const trayectos = itinerario.trayectos.map((t: any) => ({
+      id: t.id,
+      tipo: 'TRAYECTO',
+      nombre: t.nombre,
+      inicio: new Date(t.horaInicio),
+      fin: new Date(t.horaFin),
+      duracionMinutos: t.duracionMinutos,
+      origen: t.origen,
+      destino: t.destino
+    }));
+
+    return [...actividades, ...trayectos]
+      .sort((a, b) => a.inicio.getTime() - b.inicio.getTime());
+  }
+}

@@ -1,0 +1,201 @@
+.calendar {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  border: 1px solid #ddd;
+  overflow-x: auto;
+}
+
+.calendar-header {
+  display: grid;
+  grid-template-columns: 60px repeat(var(--days), 1fr);
+  background: #fafafa;
+  border-bottom: 1px solid #ddd;
+}
+
+.day-header {
+  padding: 8px;
+  text-align: center;
+  font-weight: 600;
+  border-left: 1px solid #eee;
+}
+
+.calendar-body {
+  display: grid;
+  grid-template-columns: 60px repeat(var(--days), 1fr);
+}
+
+.hour-column {
+  border-right: 1px solid #eee;
+}
+
+.hour {
+  height: 24px;
+  font-size: 0.75rem;
+  color: #666;
+  padding-left: 4px;
+}
+
+.day-column {
+  position: relative;
+  border-left: 1px solid #eee;
+}
+
+.item {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  border-radius: 6px;
+  padding: 6px;
+  font-size: 0.75rem;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.item.ACTIVIDAD {
+  background: #e3f2fd;
+  border-left: 4px solid #2196f3;
+}
+
+.item.TRAYECTO {
+  background: #fce4ec;
+  border-left: 4px solid #e91e63;
+}
+
+.item:hover {
+  filter: brightness(0.97);
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  background: transparent;
+  border: none;
+  padding: 0.25rem 0.5rem;
+
+  font-size: 1rem;
+  font-weight: 500;
+  color: #555;
+
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.back-btn:hover {
+  color: #000;
+}
+
+.calendar-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 0.75rem;
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.toolbar-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+
+  background: transparent;
+  border: none;
+  padding: 0.35rem 0.6rem;
+
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #555;
+
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.toolbar-btn i {
+  font-size: 1rem;
+}
+
+.toolbar-btn:hover {
+  color: #000;
+}
+
+.toolbar-btn.back {
+  padding-left: 0;
+}
+
+.selection-preview {
+  position: absolute;
+  background: rgba(100, 149, 237, 0.3);
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.day-column {
+  position: relative;
+}
+
+.slots-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.slot {
+  height: 24px;
+  /* PX_PER_SLOT */
+  cursor: pointer;
+}
+
+.slot:hover {
+  background: rgba(100, 100, 255, 0.08);
+}
+
+.slot.selecting {
+  cursor: crosshair;
+}
+
+.item {
+  position: absolute;
+  z-index: 2;
+}
+
+.selection-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.selection-preview {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  background: rgba(0, 123, 255, 0.35);
+  border-radius: 6px;
+  pointer-events: none;
+  z-index: 6;
+}
+
+.item {
+  position: absolute;
+  z-index: 10;
+}
+
+.calendar-wrapper.selecting::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.05);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.calendar-wrapper.selecting .slot {
+  cursor: crosshair;
+}

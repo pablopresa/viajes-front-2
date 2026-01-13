@@ -1,0 +1,93 @@
+.viaje-list-card {
+    max-width: 720px;
+    margin: 2rem auto;
+  }
+  
+  /* Header */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  .header h2 {
+    margin: 0;
+  }
+  
+  /* Empty state */
+  .empty {
+    text-align: center;
+    color: #6b7280;
+    font-size: 0.95rem;
+  }
+  
+  /* List */
+  .viajes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .viaje-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  
+    padding: 0.9rem 1rem;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+  
+    text-decoration: none;
+    color: inherit;
+  
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  
+  .viaje-item:hover {
+    background-color: #f9fafb;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  }
+  
+  /* Left side */
+  .viaje-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+  
+  .nombre {
+    font-weight: 600;
+  }
+  
+  .fechas {
+    font-size: 0.85rem;
+    color: #6b7280;
+  }
+  
+  /* Right side */
+  .viaje-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #6b7280;
+  }
+  
+  .moneda {
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+  
+  /* Responsive */
+  @media (max-width: 640px) {
+    .viaje-item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+  
+    .viaje-meta {
+      align-self: flex-end;
+    }
+  }
+  

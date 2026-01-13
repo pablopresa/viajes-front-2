@@ -1,0 +1,65 @@
+<p-card header="Nuevo viaje" class="viaje-card">
+  <form [formGroup]="form" (ngSubmit)="guardar()" class="viaje-form">
+
+    <!-- Nombre -->
+    <div class="field">
+      <label for="nombre">Nombre del viaje</label>
+      <input id="nombre" pInputText type="text" formControlName="nombre" placeholder="Ej: Europa 2026" class="w-full" />
+    </div>
+
+    <!-- Fechas -->
+    <div class="form-grid">
+      <div class="field">
+        <label for="fechaInicio">Fecha inicio</label>
+        <p-datepicker id="fechaInicio" formControlName="fechaInicio" dateFormat="yy-mm-dd" showIcon
+          class="w-full"></p-datepicker>
+      </div>
+
+      <div class="field">
+        <label for="fechaFin">Fecha fin</label>
+        <p-datepicker id="fechaFin" formControlName="fechaFin" dateFormat="yy-mm-dd" showIcon
+          class="w-full"></p-datepicker>
+      </div>
+    </div>
+
+    <!-- Moneda / Cambio -->
+    <div class="form-grid">
+      <div class="field">
+        <label for="monedaBase">Moneda base</label>
+        <p-select id="monedaBase" formControlName="monedaBase" [options]="monedas" optionLabel="label"
+          optionValue="value" placeholder="Seleccione moneda" class="w-full"></p-select>
+      </div>
+
+      <div class="field">
+        <label for="tipoCambio">Tipo de cambio</label>
+        <p-inputNumber id="tipoCambio" formControlName="tipoCambio" [minFractionDigits]="2" [maxFractionDigits]="2"
+          class="w-full"></p-inputNumber>
+      </div>
+    </div>
+
+    <!-- Presupuesto -->
+    <div class="field">
+      <label for="presupuestoTotal">Presupuesto total</label>
+      <p-inputNumber id="presupuestoTotal" formControlName="presupuestoTotal" mode="currency" [currency]="form.value.monedaBase"
+        locale="es-UY" class="w-full"></p-inputNumber>
+    </div>
+
+    <!-- Rigidez -->
+    <div class="field">
+      <label for="rigidezRegistro">Rigidez del registro</label>
+      <p-select id="rigidezRegistro" formControlName="rigidezRegistro" [options]="rigideces" optionLabel="label"
+        optionValue="value" placeholder="Seleccione rigidez" class="w-full"></p-select>
+    </div>
+
+    <!-- Acciones -->
+    <div class="form-actions">
+      <button pButton type="submit" label="Crear viaje" icon="pi pi-check"
+        [disabled]="form.invalid || loading"></button>
+
+      <button pButton type="button" label="Cancelar" icon="pi pi-times" severity="secondary" routerLink="/viajes/">
+      </button>
+
+    </div>
+
+  </form>
+</p-card>

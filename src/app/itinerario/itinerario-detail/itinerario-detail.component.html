@@ -1,0 +1,107 @@
+<!-- ───────────────── Toolbar ───────────────── -->
+<div class="calendar-toolbar">
+
+    <!-- Izquierda: volver -->
+    <button class="toolbar-btn back" type="button" (click)="goBack()">
+      <i class="pi pi-arrow-left"></i>
+      <span>Volver</span>
+    </button>
+  
+    <!-- Derecha: acciones -->
+    <div class="toolbar-actions">
+      <button class="toolbar-btn" type="button" (click)="agregarActividad()">
+        <i class="pi pi-plus"></i>
+        <span>Actividad</span>
+      </button>
+  
+      <button class="toolbar-btn" type="button" (click)="agregarTrayecto()">
+        <i class="pi pi-plus"></i>
+        <span>Trayecto</span>
+      </button>
+    </div>
+  
+  </div>
+  
+  <!-- ───────────────── Calendar Wrapper ───────────────── -->
+  <div class="calendar-wrapper" [class.selecting]="isSelecting">
+  
+    <!-- ───────────────── Calendar ───────────────── -->
+    <div class="calendar" [style.--days]="days.length">
+  
+      <!-- 🟦 Overlay oscuro cuando está en modo selección -->
+      @if (isSelecting) {
+        <div class="selection-overlay"></div>
+      }
+  
+      <!-- Header -->
+      <div class="calendar-header">
+        <div class="hour-column"></div>
+  
+        @for (day of days; track day.getTime()) {
+          <div class="day-header">
+            {{ day | date:'EEE dd/MM' }}
+          </div>
+        }
+      </div>
+  
+      <!-- Body -->
+      <div class="calendar-body">
+  
+        <!-- Hours -->
+        <div class="hour-column">
+          @for (h of hours; track h) {
+            <div class="hour">
+              {{ h }}
+            </div>
+          }
+        </div>
+  
+        <!-- Day columns -->
+        @for (day of days; track day.getTime()) {
+          <div class="day-column">
+  
+            <!-- ⬇️ Slots clickeables / hover (SELECCIÓN DE RANGO) -->
+            <div class="slots-layer">
+              @for (slot of hours; let i = $index; track i) {
+                <div
+                  class="slot"
+                  [class.selecting]="isSelecting"
+                  (click)="onSlotClick(day, i)"
+                  (mouseenter)="onSlotHover(day, i)">
+                </div>
+              }
+            </div>
+  
+            <!-- 🟦 Preview del rango seleccionado (en tiempo real) -->
+            @for (preview of previewByDay[dayKey(day)] ?? []; track $index) {
+              <div
+                class="selection-preview"
+                [style.top.px]="preview.top"
+                [style.height.px]="preview.height">
+              </div>
+            }
+  
+            <!-- ⬆️ Items reales del calendario -->
+            @for (item of itemsByDay[dayKey(day)]; track item._uid) {
+              <div
+                class="item"
+                [ngClass]="item.tipo"
+                [style.top.px]="item.top"
+                [style.height.px]="item.height">
+  
+                <strong>{{ item.nombre }}</strong>
+  
+                @if (item.tipo === 'TRAYECTO') {
+                  <br>
+                  <small>{{ item.origen }} → {{ item.destino }}</small>
+                }
+              </div>
+            }
+  
+          </div>
+        }
+  
+      </div>
+    </div>
+  </div>
+  

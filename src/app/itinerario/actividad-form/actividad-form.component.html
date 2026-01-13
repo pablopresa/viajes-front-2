@@ -1,0 +1,58 @@
+<form [formGroup]="form" class="actividad-form">
+
+    <div class="field">
+      <label>Nombre</label>
+      <input pInputText formControlName="nombre" />
+    </div>
+  
+    <div class="field">
+      <label>Ubicación</label>
+      <input pInputText formControlName="ubicacion" />
+    </div>
+  
+    <div class="field">
+      <label>Duración (min)</label>
+      <p-inputNumber
+        formControlName="duracionMinutos"
+        [min]="1">
+      </p-inputNumber>
+    </div>
+  
+    <div class="field">
+      <label>Costo estimado</label>
+      <p-inputNumber
+        formControlName="costoEstimado"
+        mode="currency"
+        currency="EUR">
+      </p-inputNumber>
+    </div>
+  
+    <div class="field">
+      <label>Descripción</label>
+      <textarea
+        pTextarea
+        rows="3"
+        formControlName="descripcion">
+      </textarea>
+    </div>
+  
+    <div class="form-actions">
+      <button
+        pButton
+        type="button"
+        class="p-button-text"
+        label="Cancelar"
+        (click)="cancelar()">
+      </button>
+  
+      <button
+        pButton
+        type="button"
+        label="Guardar"
+        (click)="guardar()"
+        [disabled]="form.invalid">
+      </button>
+    </div>
+  
+  </form>
+  

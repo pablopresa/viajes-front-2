@@ -1,0 +1,37 @@
+@let viaje = viaje$ | async;
+@let itinerario = itinerarioItems$ | async;
+
+@if (viaje && itinerario) {
+
+  <div class="viaje-actions">
+
+    <!-- Botón Itinerario -->
+    <button
+      class="viaje-action-btn"
+      [routerLink]="['/viajes', viaje.id, 'itinerario']"
+      [state]="{
+        itinerario: itinerario,
+        fechaInicio: viaje.fechaInicio,
+        fechaFin: viaje.fechaFin
+      }"
+      type="button">
+
+      <i class="pi pi-calendar"></i>
+      <span>Itinerario</span>
+    </button>
+
+    <!-- Botón Gastos -->
+    <button
+      class="viaje-action-btn"
+      [routerLink]="['/viajes', viaje.id, 'gastos']"
+      type="button">
+
+      <i class="pi pi-wallet"></i>
+      <span>Gastos</span>
+    </button>
+
+  </div>
+
+} @else {
+  <p>Cargando viaje...</p>
+}
