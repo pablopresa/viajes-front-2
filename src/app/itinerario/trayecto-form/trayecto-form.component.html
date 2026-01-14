@@ -1,1 +1,34 @@
-<p>trayecto-form works!</p>
+<form [formGroup]="form" class="actividad-form p-fluid">
+
+    <div class="p-field">
+        <label for="origen">Origen *</label>
+        <input id="origen" pInputText formControlName="origen" autofocus />
+    </div>
+
+    <div class="p-field">
+        <label for="destino">Destino *</label>
+        <input id="destino" pInputText formControlName="destino" />
+    </div>
+
+    <div class="p-field">
+        <label for="medioTransporte">Medio de transporte *</label>
+        <p-select id="medioTransporte" formControlName="medioTransporte" [options]="mediosDeTransporte"
+            optionLabel="label" optionValue="value" placeholder="Seleccione moneda" class="w-full"></p-select>
+    </div>
+
+    <div class="p-field">
+        <label for="costo">Costo estimado</label>
+        <p-inputNumber inputId="costo" formControlName="costoEstimado" mode="currency" currency="EUR"
+            [showButtons]="true" [min]="0">
+        </p-inputNumber>
+    </div>
+
+    <div class="form-actions">
+        <button pButton type="button" label="Cancelar" class="p-button-text" (click)="cancelar()">
+        </button>
+
+        <button pButton type="submit" label="Guardar" icon="pi pi-check" (click)="guardar()" [disabled]="form.invalid">
+        </button>
+    </div>
+
+</form>

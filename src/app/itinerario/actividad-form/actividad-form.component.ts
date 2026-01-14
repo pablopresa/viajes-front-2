@@ -29,6 +29,7 @@ export class ActividadFormComponent {
 
   readonly inicio: Date = this.config.data.inicio;
   readonly fin: Date = this.config.data.fin;
+  readonly monedaBase: string = this.config.data.monedaBase;
 
   form = this.fb.nonNullable.group({
     nombre: ['', Validators.required],
@@ -48,24 +49,41 @@ export class ActividadFormComponent {
 
   guardar(): void {
     if (this.form.invalid) return;
+    this.dialogRef.close(this.buildActividad());
+  }
 
-    const fecha = this.inicio.toISOString().substring(0, 10);
-    const horaInicio = this.inicio.toISOString().substring(0, 16);
-
-    this.dialogRef.close({
-      nombre: this.form.value.nombre!,
+  private buildActividad() {
+    const fecha = this.formatDateLocal(this.inicio);
+    const horaInicio = this.formatDateTimeLocal(this.inicio);
+  
+    return {
+      nombre: this.form.controls.nombre.value,
       fecha,
       horaInicio,
-      duracionMinutos: this.form.value.duracionMinutos!,
-      ubicacion: this.form.value.ubicacion ?? '',
+      duracionMinutos: this.form.controls.duracionMinutos.value,
+      ubicacion: this.form.controls.ubicacion.value ?? '',
       costo: null,
-      descripcion: this.form.value.descripcion ?? '',
-      costoEstimado: this.form.value.costoEstimado,
+      descripcion: this.form.controls.descripcion.value ?? '',
+      costoEstimado: this.form.controls.costoEstimado.value,
       tipo: 'ACTIVIDAD'
-    });
+    };
   }
 
   cancelar(): void {
     this.dialogRef.close(null);
   }
+
+  private formatDateLocal(date: Date): string {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+  
+  private formatDateTimeLocal(date: Date): string {
+    const h = String(date.getHours()).padStart(2, '0');
+    const min = String(date.getMinutes()).padStart(2, '0');
+    return `${this.formatDateLocal(date)}T${h}:${min}`;
+  }
+  
 }

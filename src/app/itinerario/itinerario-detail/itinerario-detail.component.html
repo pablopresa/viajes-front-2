@@ -1,3 +1,5 @@
+<p-toast position="top-center" />
+
 <!-- ───────────────── Toolbar ───────────────── -->
 <div class="calendar-toolbar">
 
@@ -73,7 +75,7 @@
             </div>
   
             <!-- 🟦 Preview del rango seleccionado (en tiempo real) -->
-            @for (preview of previewByDay[dayKey(day)] ?? []; track $index) {
+            @for (preview of previewByDay[dayKey(day)]; track $index) {
               <div
                 class="selection-preview"
                 [style.top.px]="preview.top"

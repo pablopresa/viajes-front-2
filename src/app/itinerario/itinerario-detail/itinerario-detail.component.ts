@@ -1,10 +1,16 @@
-import { ChangeDetectionStrategy, Component, HostListener, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, OnInit, inject } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { DialogService } from 'primeng/dynamicdialog';
 
 import { ItinerarioItem } from '../../core/models/itinerario-item';
 import { ActividadFormComponent } from '../actividad-form/actividad-form.component';
 import { TrayectoFormComponent } from '../trayecto-form/trayecto-form.component';
+import { ItinerarioService } from '../../core/services/itinerario.service';
+import { Actividad } from '../../core/models/actividad.model';
+import { ActivatedRoute, RouterModule } from "@angular/router";
+import { Trayecto } from '../../core/models/trayecto.model';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 interface CalendarItem extends ItinerarioItem {
   top: number;
@@ -17,8 +23,8 @@ type SelectionMode = 'NONE' | 'ACTIVIDAD' | 'TRAYECTO';
 @Component({
   selector: 'app-itinerario-detail',
   standalone: true,
-  imports: [CommonModule],
-  providers: [DialogService],
+  imports: [CommonModule, RouterModule, ToastModule],
+  providers: [DialogService, MessageService],
   templateUrl: './itinerario-detail.component.html',
   styleUrl: './itinerario-detail.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -31,6 +37,7 @@ export class ItinerarioDetailComponent implements OnInit {
       this.previewByDay = {};
     }
   }
+
   // ────────────────────────
   // Estado de selección
   // ────────────────────────
@@ -39,7 +46,6 @@ export class ItinerarioDetailComponent implements OnInit {
   selectionEnd: Date | null = null;
   isSelecting = false;
   hoverDate: Date | null = null;
-
 
   previewByDay: Record<string, { top: number; height: number }[]> = {};
 
@@ -53,6 +59,9 @@ export class ItinerarioDetailComponent implements OnInit {
 
   viajeInicio!: Date;
   viajeFin!: Date;
+  monedaBase!: string;
+
+  viajeId!: number;
 
   readonly START_HOUR = 0;
   readonly END_HOUR = 23;
@@ -64,16 +73,25 @@ export class ItinerarioDetailComponent implements OnInit {
   // ────────────────────────
   private location = inject(Location);
   private dialogService = inject(DialogService);
+  private actividadService = inject(ItinerarioService);
+  private route = inject(ActivatedRoute);
+  private cdr = inject(ChangeDetectorRef);
+  private messageService = inject(MessageService);
 
   // ────────────────────────
   // Init
   // ────────────────────────
   ngOnInit(): void {
+
+    this.viajeId = Number(this.route.snapshot.paramMap.get('id'));
+
     const state = history.state as {
       itinerario?: ItinerarioItem[];
       fechaInicio?: string | Date;
       fechaFin?: string | Date;
+      monedaBase?: string;
     };
+
 
     if (!state?.fechaInicio || !state?.fechaFin) {
       this.reset();
@@ -82,6 +100,7 @@ export class ItinerarioDetailComponent implements OnInit {
 
     this.viajeInicio = new Date(state.fechaInicio);
     this.viajeFin = new Date(state.fechaFin);
+    this.monedaBase = state.monedaBase ?? '';
 
     this.items = (state.itinerario ?? []).map(item => ({
       ...item,
@@ -134,31 +153,61 @@ export class ItinerarioDetailComponent implements OnInit {
   onSlotClick(day: Date, slotIndex: number): void {
     if (!this.isSelecting) return;
 
-    const date = this.slotToDate(day, slotIndex);
+    const slotStart = this.slotToDate(day, slotIndex);
+    const slotEnd = this.endExclusive(slotStart);
 
     // Primer click
     if (!this.selectionStart) {
-      this.selectionStart = date;
-      this.selectionEnd = date;
+      this.selectionStart = slotStart;
+      this.selectionEnd = slotEnd;
       this.updatePreview();
       return;
     }
 
-    // Segundo click → confirmar
-    this.selectionEnd = date;
+    // Segundo click → finalizar selección
+    this.selectionEnd = slotEnd;
     this.normalizeSelection();
     this.updatePreview();
-    this.confirmRange();
+
+    const esValido = this.rangoValido(this.selectionStart, this.selectionEnd);
+
+    if (esValido) {
+      this.confirmRange();
+    } else {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Rango inválido',
+        detail: 'La actividad o trayecto se superpone con otro elemento.'
+      });
+      this.cancelSelection();
+    }
   }
+
+  private rangoValido(start: Date | null, end: Date | null): boolean {
+    if (!start || !end) return false;
+
+    const nuevoInicio = start.getTime();
+    const nuevoFin = end.getTime(); // ya es exclusivo
+
+    return !this.items.some(item => {
+      const itemInicio = item.inicio.getTime();
+      const itemFin = itemInicio + item.duracionMinutos * 60_000;
+
+      // solapamiento real
+      return nuevoInicio < itemFin && itemInicio < nuevoFin;
+    });
+  }
+
 
   onSlotHover(day: Date, slotIndex: number): void {
     if (!this.isSelecting || !this.selectionStart) return;
 
-    const date = this.slotToDate(day, slotIndex);
-    this.selectionEnd = date;
+    const slotStart = this.slotToDate(day, slotIndex);
+    this.selectionEnd = this.endExclusive(slotStart);
     this.normalizeSelection();
     this.updatePreview();
   }
+
 
   private slotToDate(day: Date, slotIndex: number): Date {
     const d = new Date(day);
@@ -237,40 +286,69 @@ export class ItinerarioDetailComponent implements OnInit {
   private openActividadModal(): void {
     const ref = this.dialogService.open(ActividadFormComponent, {
       header: 'Nueva actividad',
-      width: '450px',
+      width: '600px',
       data: {
         inicio: this.selectionStart,
-        fin: this.selectionEnd
+        fin: this.selectionEnd,
+        monedaBase: this.monedaBase
       }
     });
 
     if (!ref) return;
 
-    ref.onClose.subscribe((actividad: ItinerarioItem | null) => {
-      if (actividad) {
-        this.addItemToCalendar(actividad);
+    ref.onClose.subscribe((actividad: Actividad | null) => {
+      if (!actividad) {
+        this.cancelSelection();
+        return;
       }
-      this.cancelSelection();
+
+      this.actividadService
+        .crearActividad(actividad, this.viajeId)
+        .subscribe({
+          next: () => {
+            this.reloadItinerario();
+            this.cancelSelection();
+          },
+          error: err => {
+            console.error('Error creando actividad', err);
+            this.cancelSelection();
+          }
+        });
+
     });
   }
 
   private openTrayectoModal(): void {
     const ref = this.dialogService.open(TrayectoFormComponent, {
       header: 'Nuevo trayecto',
-      width: '450px',
+      width: '600px',
       data: {
         inicio: this.selectionStart,
-        fin: this.selectionEnd
+        fin: this.selectionEnd,
+        monedaBase: this.monedaBase
       }
     });
 
     if (!ref) return;
 
-    ref.onClose.subscribe((trayecto: ItinerarioItem | null) => {
-      if (trayecto) {
-        this.addItemToCalendar(trayecto);
+    ref.onClose.subscribe((trayecto: Trayecto | null) => {
+      if (!trayecto) {
+        this.cancelSelection();
+        return;
       }
-      this.cancelSelection();
+
+      this.actividadService
+        .crearActividad(trayecto, this.viajeId)
+        .subscribe({
+          next: () => {
+            this.reloadItinerario();
+            this.cancelSelection();
+          },
+          error: err => {
+            console.error('Error creando actividad', err);
+            this.cancelSelection();
+          }
+        });
     });
   }
 
@@ -351,6 +429,59 @@ export class ItinerarioDetailComponent implements OnInit {
   }
 
   dayKey(d: Date): string {
-    return d.toISOString().substring(0, 10);
+    return d?.toISOString().substring(0, 10);
   }
+
+  private reloadItinerario(): void {
+    this.actividadService
+      .obtenerItinerario(this.viajeId)
+      .subscribe({
+        next: itinerario => {
+          this.items = this.mapItinerario(itinerario).map(item => ({
+            ...item,
+            inicio: new Date(item.inicio),
+            fin: new Date(item.fin)
+          }));
+
+          this.mapItems();
+        },
+        error: err => {
+          console.error('Error recargando itinerario', err);
+        }
+      });
+
+    this.cdr.markForCheck();
+  }
+
+  private mapItinerario(itinerario: any): ItinerarioItem[] {
+    const actividades = itinerario.actividades.map((a: any) => ({
+      id: a.id,
+      tipo: 'ACTIVIDAD',
+      nombre: a.nombre,
+      inicio: new Date(a.horaInicio),
+      fin: new Date(a.horaFin),
+      duracionMinutos: a.duracionMinutos
+    }));
+
+    const trayectos = itinerario.trayectos.map((t: any) => ({
+      id: t.id,
+      tipo: 'TRAYECTO',
+      nombre: t.nombre,
+      inicio: new Date(t.horaInicio),
+      fin: new Date(t.horaFin),
+      duracionMinutos: t.duracionMinutos,
+      origen: t.origen,
+      destino: t.destino,
+      medioTransporte: t.medioTransporte
+    }));
+
+    return [...actividades, ...trayectos]
+      .sort((a, b) => a.inicio.getTime() - b.inicio.getTime());
+  }
+
+  private endExclusive(date: Date): Date {
+    return new Date(date.getTime() + this.SLOT_MINUTES * 60_000);
+  }
+
+
 }
