@@ -18,6 +18,7 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Trayecto } from '../../core/models/trayecto.model';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { Util } from '../../core/commons/util';
 
 interface CalendarItem extends ItinerarioItem {
   top: number;
@@ -94,8 +95,9 @@ export class ItinerarioDetailComponent implements OnInit {
       return;
     }
 
-    this.viajeInicio = new Date(state.fechaInicio);
-    this.viajeFin = new Date(state.fechaFin);
+    this.viajeInicio = Util.parseLocalDate(state.fechaInicio);
+    this.viajeFin = Util.parseLocalDate(state.fechaFin);
+
     this.monedaBase = state.monedaBase ?? '';
 
     this.items = (state.itinerario ?? []).map(item => ({
@@ -297,136 +299,136 @@ export class ItinerarioDetailComponent implements OnInit {
   }
 
   private rangoValido(start: Date | null, end: Date | null): boolean {
-  if (!start || !end) return false;
+    if (!start || !end) return false;
 
-  const nuevoInicio = start.getTime();
-  const nuevoFin = end.getTime(); // exclusivo
+    const nuevoInicio = start.getTime();
+    const nuevoFin = end.getTime(); // exclusivo
 
-  return !this.items.some(item => {
-    const itemInicio = item.inicio.getTime();
-    const itemFin = itemInicio + item.duracionMinutos * 60_000;
+    return !this.items.some(item => {
+      const itemInicio = item.inicio.getTime();
+      const itemFin = itemInicio + item.duracionMinutos * 60_000;
 
-    // solapamiento real
-    return nuevoInicio < itemFin && itemInicio < nuevoFin;
-  });
-}
-
-
-private openActividadModal(): void {
-  const ref = this.dialogService.open(ActividadFormComponent, {
-    header: 'Nueva actividad',
-    width: '600px',
-    data: {
-      inicio: this.selectionStart,
-      fin: this.selectionEnd,
-      monedaBase: this.monedaBase
-    }
-  });
-
-  if (!ref) return;
-
-  ref.onClose.subscribe((actividad: Actividad | null) => {
-    if (!actividad) {
-      this.cancelSelection();
-      return;
-    }
-
-    this.itinerarioService
-      .crearActividad(actividad, this.viajeId)
-      .subscribe({
-        next: () => {
-          this.reloadItinerario();
-          this.cancelSelection();
-        },
-        error: err => {
-          console.error('Error creando actividad', err);
-          this.cancelSelection();
-        }
-      });
-  });
-}
+      // solapamiento real
+      return nuevoInicio < itemFin && itemInicio < nuevoFin;
+    });
+  }
 
 
-private openTrayectoModal(): void {
-  const ref = this.dialogService.open(TrayectoFormComponent, {
-    header: 'Nuevo trayecto',
-    width: '600px',
-    data: {
-      inicio: this.selectionStart,
-      fin: this.selectionEnd,
-      monedaBase: this.monedaBase
-    }
-  });
-
-  if (!ref) return;
-
-  ref.onClose.subscribe((trayecto: Trayecto | null) => {
-    if (!trayecto) {
-      this.cancelSelection();
-      return;
-    }
-
-    this.itinerarioService
-      .crearActividad(trayecto, this.viajeId)
-      .subscribe({
-        next: () => {
-          this.reloadItinerario();
-          this.cancelSelection();
-        },
-        error: err => {
-          console.error('Error creando trayecto', err);
-          this.cancelSelection();
-        }
-      });
-  });
-}
-
-
-private reloadItinerario(): void {
-  this.itinerarioService
-    .obtenerItinerario(this.viajeId)
-    .subscribe({
-      next: itinerario => {
-        this.items = this.mapItinerario(itinerario).map(item => ({
-          ...item,
-          inicio: new Date(item.inicio),
-          fin: new Date(item.fin)
-        }));
-
-        this.mapItems();
-        this.cdr.markForCheck();
-      },
-      error: err => {
-        console.error('Error recargando itinerario', err);
+  private openActividadModal(): void {
+    const ref = this.dialogService.open(ActividadFormComponent, {
+      header: 'Nueva actividad',
+      width: '600px',
+      data: {
+        inicio: this.selectionStart,
+        fin: this.selectionEnd,
+        monedaBase: this.monedaBase
       }
     });
-}
+
+    if (!ref) return;
+
+    ref.onClose.subscribe((actividad: Actividad | null) => {
+      if (!actividad) {
+        this.cancelSelection();
+        return;
+      }
+
+      this.itinerarioService
+        .crearActividad(actividad, this.viajeId)
+        .subscribe({
+          next: () => {
+            this.reloadItinerario();
+            this.cancelSelection();
+          },
+          error: err => {
+            console.error('Error creando actividad', err);
+            this.cancelSelection();
+          }
+        });
+    });
+  }
 
 
-private mapItinerario(itinerario: any): ItinerarioItem[] {
-  const actividades = itinerario.actividades.map((a: any) => ({
-    id: a.id,
-    tipo: 'ACTIVIDAD',
-    nombre: a.nombre,
-    inicio: new Date(a.horaInicio),
-    fin: new Date(a.horaFin),
-    duracionMinutos: a.duracionMinutos
-  }));
+  private openTrayectoModal(): void {
+    const ref = this.dialogService.open(TrayectoFormComponent, {
+      header: 'Nuevo trayecto',
+      width: '600px',
+      data: {
+        inicio: this.selectionStart,
+        fin: this.selectionEnd,
+        monedaBase: this.monedaBase
+      }
+    });
 
-  const trayectos = itinerario.trayectos.map((t: any) => ({
-    id: t.id,
-    tipo: 'TRAYECTO',
-    nombre: t.nombre,
-    inicio: new Date(t.horaInicio),
-    fin: new Date(t.horaFin),
-    duracionMinutos: t.duracionMinutos,
-    origen: t.origen,
-    destino: t.destino,
-    medioTransporte: t.medioTransporte
-  }));
+    if (!ref) return;
 
-  return [...actividades, ...trayectos]
-    .sort((a, b) => a.inicio.getTime() - b.inicio.getTime());
-}
+    ref.onClose.subscribe((trayecto: Trayecto | null) => {
+      if (!trayecto) {
+        this.cancelSelection();
+        return;
+      }
+
+      this.itinerarioService
+        .crearActividad(trayecto, this.viajeId)
+        .subscribe({
+          next: () => {
+            this.reloadItinerario();
+            this.cancelSelection();
+          },
+          error: err => {
+            console.error('Error creando trayecto', err);
+            this.cancelSelection();
+          }
+        });
+    });
+  }
+
+
+  private reloadItinerario(): void {
+    this.itinerarioService
+      .obtenerItinerario(this.viajeId)
+      .subscribe({
+        next: itinerario => {
+          this.items = this.mapItinerario(itinerario).map(item => ({
+            ...item,
+            inicio: new Date(item.inicio),
+            fin: new Date(item.fin)
+          }));
+
+          this.mapItems();
+          this.cdr.markForCheck();
+        },
+        error: err => {
+          console.error('Error recargando itinerario', err);
+        }
+      });
+  }
+
+
+  private mapItinerario(itinerario: any): ItinerarioItem[] {
+    const actividades = itinerario.actividades.map((a: any) => ({
+      id: a.id,
+      tipo: 'ACTIVIDAD',
+      nombre: a.nombre,
+      inicio: new Date(a.horaInicio),
+      fin: new Date(a.horaFin),
+      duracionMinutos: a.duracionMinutos
+    }));
+
+    const trayectos = itinerario.trayectos.map((t: any) => ({
+      id: t.id,
+      tipo: 'TRAYECTO',
+      nombre: t.nombre,
+      inicio: new Date(t.horaInicio),
+      fin: new Date(t.horaFin),
+      duracionMinutos: t.duracionMinutos,
+      origen: t.origen,
+      destino: t.destino,
+      medioTransporte: t.medioTransporte
+    }));
+
+    return [...actividades, ...trayectos]
+      .sort((a, b) => a.inicio.getTime() - b.inicio.getTime());
+  }
 
 }
