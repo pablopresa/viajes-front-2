@@ -7,7 +7,8 @@ import { CrearViajeRequest } from '../models/crear-viaje-request';
 @Injectable({ providedIn: 'root' })
 export class ViajeService {
 
-  private readonly apiUrl = '/api/viajes';
+  // private readonly apiUrl = '/api/viajes';
+  private readonly apiUrl = 'http://localhost:8080/api/viajes';
 
   constructor(private http: HttpClient) {}
 

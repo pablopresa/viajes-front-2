@@ -10,7 +10,8 @@ import { ItinerarioItem } from '../models/itinerario-item';
 @Injectable({ providedIn: 'root' })
 export class ItinerarioService {
 
-  private readonly apiUrl = '/api/viajes';
+  // private readonly apiUrl = '/api/viajes';
+  private readonly apiUrl = 'http://localhost:8080/api/viajes';
 
   constructor(private http: HttpClient) { }
 
