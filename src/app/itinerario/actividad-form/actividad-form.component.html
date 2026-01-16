@@ -1,33 +1,66 @@
-<form [formGroup]="form" class="actividad-form p-fluid">
+<form [formGroup]="form" class="actividad-form">
 
-  <div class="p-field">
-    <label for="nombre">Nombre *</label>
-    <input id="nombre" pInputText formControlName="nombre" autofocus />
-  </div>
+  <div class="grid form-grid">
 
-  <div class="p-field">
-    <label for="ubicacion">Ubicación</label>
-    <input id="ubicacion" pInputText formControlName="ubicacion" />
-  </div>
+    <div class="col-12">
+      <label for="nombre">Nombre *</label>
+      <input
+        id="nombre"
+        pInputText
+        formControlName="nombre"
+      />
+    </div>
 
-  <div class="p-field">
-    <label for="costo">Costo estimado</label>
-    <p-inputNumber inputId="costo" formControlName="costoEstimado" mode="currency" [currency]="monedaBase" [showButtons]="true"
-      [min]="0">
-    </p-inputNumber>
-  </div>
+    <div class="col-12">
+      <label for="ubicacion">Ubicación</label>
+      <input
+        id="ubicacion"
+        pInputText
+        formControlName="ubicacion"
+      />
+    </div>
 
-  <div class="p-field">
-    <label for="descripcion">Descripción</label>
-    <textarea id="descripcion" pTextarea rows="3" autoResize formControlName="descripcion">
-    </textarea>
+    <div class="col-12 md:col-4">
+      <label for="costo">Costo estimado</label>
+      <p-inputNumber
+        inputId="costo"
+        formControlName="costoEstimado"
+        mode="currency"
+        [currency]="monedaBase"
+        [showButtons]="false"
+        [min]="0">
+      </p-inputNumber>
+    </div>
+
+    <div class="col-12">
+      <label for="descripcion">Descripción (Opcional)</label>
+      <textarea
+        id="descripcion"
+        pTextarea
+        rows="2"
+        formControlName="descripcion">
+      </textarea>
+    </div>
+
   </div>
 
   <div class="form-actions">
-    <button pButton type="button" label="Cancelar" class="p-button-text" (click)="cancelar()">
+    <button
+      pButton
+      type="button"
+      label="Cancelar"
+      class="p-button-text p-button-sm"
+      (click)="cancelar()">
     </button>
 
-    <button pButton type="submit" label="Guardar" icon="pi pi-check" (click)="guardar()" [disabled]="form.invalid">
+    <button
+      pButton
+      type="submit"
+      label="Guardar"
+      icon="pi pi-check"
+      class="p-button-sm"
+      (click)="guardar()"
+      [disabled]="form.invalid">
     </button>
   </div>
 

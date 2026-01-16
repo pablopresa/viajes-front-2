@@ -8,7 +8,6 @@ import { Observable } from "rxjs";
 import { ButtonModule } from "primeng/button";
 import { CardModule } from "primeng/card";
 import { Viaje } from "../../core/models/viaje.model";
-import { Util } from "../../core/commons/util";
 
 @Component({
   standalone: true,

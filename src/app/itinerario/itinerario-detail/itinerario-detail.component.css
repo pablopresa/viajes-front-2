@@ -199,3 +199,67 @@
 .calendar-wrapper.selecting .slot {
   cursor: crosshair;
 }
+
+/* Altura de slot */
+.hour,
+.slot {
+  height: 24px;
+}
+
+/* Hover de fila completa */
+.hover-row {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* Columnas */
+.day-column {
+  position: relative;
+  border-left: 1px solid #eee;
+}
+
+/* Slots */
+.slots-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.slot {
+  cursor: pointer;
+}
+
+.slot.selecting {
+  cursor: crosshair;
+}
+
+/* Preview */
+.selection-preview {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  background: rgba(0, 123, 255, 0.35);
+  border-radius: 6px;
+  pointer-events: none;
+  z-index: 6;
+}
+
+/* Items */
+.item {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  border-radius: 6px;
+  padding: 6px;
+  font-size: 0.75rem;
+  z-index: 10;
+}
+
+.item.ACTIVIDAD {
+  background: #e3f2fd;
+  border-left: 4px solid #2196f3;
+}
+
+.item.TRAYECTO {
+  background: #fce4ec;
+  border-left: 4px solid #e91e63;
+}

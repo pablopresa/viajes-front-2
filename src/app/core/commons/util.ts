@@ -9,4 +9,7 @@ export class Util {
         return new Date(y, m - 1, d, 0, 0, 0, 0);
     }
 
+    public static capitalize(texto: string): string {
+        return texto.charAt(0).toUpperCase() + texto.substring(1, texto.length);
+    }
 }

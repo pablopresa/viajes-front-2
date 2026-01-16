@@ -11,12 +11,7 @@ import { ViajeService } from '../../core/services/viaje.service';
 @Component({
   selector: 'app-viaje-list',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
-    CardModule,
-    ButtonModule
-  ],
+  imports: [CommonModule, RouterModule, CardModule, ButtonModule],
   templateUrl: './viaje-list.component.html',
   styleUrls: ['./viaje-list.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush

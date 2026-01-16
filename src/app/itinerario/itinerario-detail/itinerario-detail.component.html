@@ -47,46 +47,46 @@
       }
     </div>
 
-
-    <!-- Body -->
+    <!-- BODY -->
     <div class="calendar-body">
 
-      <!-- Hours -->
+      <!-- Columna horas -->
       <div class="hour-column">
-        @for (h of hours; track h) {
-        <div class="hour">
+        @for (h of hours; let i = $index; track h) {
+        <div class="hour" [class.hover-row]="hoveredSlotIndex === i">
           {{ h }}
         </div>
         }
       </div>
 
-      <!-- Day columns -->
+      <!-- Columnas por día -->
       @for (day of days; track day.getTime()) {
       <div class="day-column">
 
-        <!-- ⬇️ Slots clickeables / hover (SELECCIÓN DE RANGO) -->
+        <!-- Slots -->
         <div class="slots-layer">
           @for (slot of hours; let i = $index; track i) {
-          <div class="slot" [class.selecting]="isSelecting" (click)="onSlotClick(day, i)"
-            (mouseenter)="onSlotHover(day, i)">
-          </div>
+          <div class="slot" [class.hover-row]="hoveredSlotIndex === i" [class.selecting]="isSelecting"
+            (mouseenter)="hoveredSlotIndex = i" (mouseleave)="hoveredSlotIndex = null" (click)="onSlotClick(day, i)"
+            (mouseenter)="onSlotHover(day, i)"></div>
           }
         </div>
 
-        <!-- 🟦 Preview del rango seleccionado (en tiempo real) -->
+        <!-- Preview -->
         @for (preview of previewByDay[dayKey(day)]; track $index) {
         <div class="selection-preview" [style.top.px]="preview.top" [style.height.px]="preview.height">
         </div>
         }
 
-        <!-- ⬆️ Items reales del calendario -->
+        <!-- Items -->
         @for (item of itemsByDay[dayKey(day)]; track item._uid) {
         <div class="item" [ngClass]="item.tipo" [style.top.px]="item.top" [style.height.px]="item.height">
 
+          @if (item.tipo === 'ACTIVIDAD') {
           <strong>{{ item.nombre }}</strong>
+          }
 
           @if (item.tipo === 'TRAYECTO') {
-          <br>
           <small>{{ item.origen }} → {{ item.destino }}</small>
           }
         </div>

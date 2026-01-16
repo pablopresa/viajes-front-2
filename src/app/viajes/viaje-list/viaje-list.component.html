@@ -24,7 +24,7 @@
       <div class="viaje-main">
         <span class="nombre">{{ v.nombre }}</span>
         <span class="fechas">
-          {{ v.fechaInicio }} → {{ v.fechaFin }}
+          {{ v.fechaInicio | date: 'dd-MM-yyyy'}} → {{ v.fechaFin | date: 'dd-MM-yyyy'}}
         </span>
       </div>
 

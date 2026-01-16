@@ -47,6 +47,8 @@ export class ItinerarioDetailComponent implements OnInit {
     }
   }
 
+  hoveredSlotIndex: number | null = null;
+
   selectionMode: SelectionMode = 'NONE';
   selectionStart: Date | null = null;
   selectionEnd: Date | null = null;
@@ -244,10 +246,12 @@ export class ItinerarioDetailComponent implements OnInit {
 
   private buildHours(): void {
     const result: string[] = [];
-    for (let h = 0; h <= 23; h++) {
+
+    for (let h = 0; h < 24; h++) {
       result.push(`${h.toString().padStart(2, '0')}:00`);
-      if (h < 23) result.push(`${h.toString().padStart(2, '0')}:30`);
+      result.push(`${h.toString().padStart(2, '0')}:30`);
     }
+
     this.hours = result;
   }
 
@@ -256,16 +260,9 @@ export class ItinerarioDetailComponent implements OnInit {
     this.days.forEach(d => result[this.dayKey(d)] = []);
 
     this.items.forEach(item => {
-      const key = this.dayKey(item.inicio);
-      if (!result[key]) return;
-
-      const minutes = item.inicio.getHours() * 60 + item.inicio.getMinutes();
-
-      result[key].push({
-        ...item,
-        top: (minutes / this.SLOT_MINUTES) * this.PX_PER_SLOT,
-        height: (item.duracionMinutos / this.SLOT_MINUTES) * this.PX_PER_SLOT,
-        _uid: crypto.randomUUID()
+      this.splitItemByDay(item).forEach(segment => {
+        const key = this.dayKey(segment.inicio);
+        if (result[key]) result[key].push(segment);
       });
     });
 
@@ -280,7 +277,7 @@ export class ItinerarioDetailComponent implements OnInit {
   }
 
   getDayName(d: Date): string {
-    return this.dayFormatter.format(d).toUpperCase();
+    return Util.capitalize(this.dayFormatter.format(d));
   }
 
   getDayNumber(d: Date): string {
@@ -317,7 +314,7 @@ export class ItinerarioDetailComponent implements OnInit {
   private openActividadModal(): void {
     const ref = this.dialogService.open(ActividadFormComponent, {
       header: 'Nueva actividad',
-      width: '600px',
+      width: '250px',
       data: {
         inicio: this.selectionStart,
         fin: this.selectionEnd,
@@ -430,5 +427,44 @@ export class ItinerarioDetailComponent implements OnInit {
     return [...actividades, ...trayectos]
       .sort((a, b) => a.inicio.getTime() - b.inicio.getTime());
   }
+
+  private splitItemByDay(item: ItinerarioItem): CalendarItem[] {
+    const result: CalendarItem[] = [];
+
+    let currentStart = new Date(item.inicio);
+
+    const itemEnd = new Date(item.inicio.getTime() + item.duracionMinutos * 60000);
+
+    while (currentStart < itemEnd) {
+      const dayStart = new Date(currentStart);
+      dayStart.setHours(0, 0, 0, 0);
+
+      const dayEnd = new Date(dayStart);
+      dayEnd.setDate(dayEnd.getDate() + 1);
+
+      const segmentStart = currentStart;
+      const segmentEnd = new Date(Math.min(dayEnd.getTime(), itemEnd.getTime()));
+
+      const minutesFromDayStart =
+        (segmentStart.getTime() - dayStart.getTime()) / 60000;
+
+      const durationMinutes =
+        (segmentEnd.getTime() - segmentStart.getTime()) / 60000;
+
+      result.push({
+        ...item,
+        inicio: new Date(segmentStart),
+        fin: new Date(segmentEnd),
+        top: (minutesFromDayStart / this.SLOT_MINUTES) * this.PX_PER_SLOT,
+        height: (durationMinutes / this.SLOT_MINUTES) * this.PX_PER_SLOT,
+        _uid: crypto.randomUUID()
+      });
+
+      currentStart = segmentEnd;
+    }
+
+    return result;
+  }
+
 
 }
