@@ -1,17 +1,40 @@
 .actividad-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-  
-  .form-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.5rem;
-    margin-top: 1rem;
-  }
-  
-  label {
-    font-weight: 600;
-  }
-  
+  padding: 0.25rem 0;
+}
+
+.form-grid {
+  row-gap: 0.75rem;
+}
+
+/* Labels */
+label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  display: block;
+}
+
+/* Compactar inputs PrimeNG */
+:host ::ng-deep .p-inputtext,
+:host ::ng-deep .p-inputnumber-input,
+:host ::ng-deep textarea {
+  height: 2rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.85rem;
+}
+
+/* Textarea un poco más alta */
+:host ::ng-deep textarea {
+  height: auto;
+  min-height: 3rem;
+}
+
+/* Acciones */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--surface-border);
+}

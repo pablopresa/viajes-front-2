@@ -1,26 +1,30 @@
-<form [formGroup]="form" class="actividad-form p-fluid">
+<form [formGroup]="form" class="actividad-form">
 
-    <div class="p-field">
-        <label for="origen">Origen *</label>
-        <input id="origen" pInputText formControlName="origen" autofocus />
-    </div>
+    <div class="grid form-grid">
 
-    <div class="p-field">
-        <label for="destino">Destino *</label>
-        <input id="destino" pInputText formControlName="destino" />
-    </div>
+        <div class="col-12">
+            <label for="medioTransporte">Medio de transporte *</label>
+            <p-select id="medioTransporte" formControlName="medioTransporte" [options]="mediosDeTransporte"
+                optionLabel="label" optionValue="value" placeholder="Seleccione" class="w-full"></p-select>
+        </div>
 
-    <div class="p-field">
-        <label for="medioTransporte">Medio de transporte *</label>
-        <p-select id="medioTransporte" formControlName="medioTransporte" [options]="mediosDeTransporte"
-            optionLabel="label" optionValue="value" placeholder="Seleccione moneda" class="w-full"></p-select>
-    </div>
+        <div class="col-12">
+            <label for="origen">Origen *</label>
+            <input id="origen" pInputText formControlName="origen" autofocus />
+        </div>
 
-    <div class="p-field">
-        <label for="costo">Costo estimado</label>
-        <p-inputNumber inputId="costo" formControlName="costoEstimado" mode="currency" currency="EUR"
-            [showButtons]="true" [min]="0">
-        </p-inputNumber>
+        <div class="col-12">
+            <label for="destino">Destino *</label>
+            <input id="destino" pInputText formControlName="destino" />
+        </div>
+
+
+        <div class="col-12 md:col-4">
+            <label for="costo">Costo estimado</label>
+            <p-inputNumber inputId="costo" formControlName="costoEstimado" mode="currency" [currency]="monedaBase"
+                [showButtons]="false" [min]="0">
+            </p-inputNumber>
+        </div>
     </div>
 
     <div class="form-actions">

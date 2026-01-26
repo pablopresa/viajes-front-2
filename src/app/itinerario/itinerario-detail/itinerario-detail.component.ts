@@ -349,7 +349,7 @@ export class ItinerarioDetailComponent implements OnInit {
   private openTrayectoModal(): void {
     const ref = this.dialogService.open(TrayectoFormComponent, {
       header: 'Nuevo trayecto',
-      width: '600px',
+      width: '250px',
       data: {
         inicio: this.selectionStart,
         fin: this.selectionEnd,
