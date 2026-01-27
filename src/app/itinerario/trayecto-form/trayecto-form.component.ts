@@ -73,7 +73,8 @@ form = this.fb.nonNullable.group({
       costoEstimado: this.form.controls.costoEstimado.value,
       origen: this.form.controls.origenCiudadId.value,
       destino: this.form.controls.destinoCiudadId.value,
-      tipo: 'TRAYECTO'
+      tipo: 'TRAYECTO',
+      medioTransporte: this.form.controls.medioTransporte.value
     };
   }
 

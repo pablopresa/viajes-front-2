@@ -20,13 +20,13 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { Util } from '../../core/commons/util';
 import { ViajeService } from '../../core/services/viaje.service';
+import { ItinerarioDetailModalComponent } from '../itinerario-detail-modal/itinerario-detail-modal.component';
 
-interface CalendarItem extends ItinerarioItem {
+export interface CalendarItem extends ItinerarioItem {
   top: number;
   height: number;
   _uid: string;
 }
-
 type SelectionMode = 'NONE' | 'ACTIVIDAD' | 'TRAYECTO';
 
 @Component({
@@ -67,11 +67,6 @@ export class ItinerarioDetailComponent implements OnInit {
   monedaBase!: string;
   viajeId!: number;
   ciudadesDelViaje: { label: string; value: number }[] = [];
-
-  readonly START_HOUR = 0;
-  readonly END_HOUR = 23;
-  readonly SLOT_MINUTES = 30;
-  readonly PX_PER_SLOT = 24;
 
   private viajeService = inject(ViajeService);
   private location = inject(Location);
@@ -117,7 +112,11 @@ export class ItinerarioDetailComponent implements OnInit {
       inicio: new Date(item.inicio),
       fin: new Date(item.fin),
       origen: item.origen,
-      destion: item.destino
+      destino: item.destino,
+      medioTransporte: item.medioTransporte,
+      costo: item.costo,
+      costoEstimado: item.costoEstimado,
+      adjuntoUrl: item.adjuntoUrl
     }));
 
     this.buildDaysFromViaje();
@@ -160,7 +159,7 @@ export class ItinerarioDetailComponent implements OnInit {
   onSlotClick(day: Date, slotIndex: number): void {
     if (!this.isSelecting) return;
 
-    const slotStart = this.slotToDate(day, slotIndex);
+    const slotStart = Util.slotToDate(day, slotIndex);
     const slotEnd = this.endExclusive(slotStart);
 
     if (!this.selectionStart) {
@@ -189,17 +188,10 @@ export class ItinerarioDetailComponent implements OnInit {
   onSlotHover(day: Date, slotIndex: number): void {
     if (!this.isSelecting || !this.selectionStart) return;
 
-    const slotStart = this.slotToDate(day, slotIndex);
+    const slotStart = Util.slotToDate(day, slotIndex);
     this.selectionEnd = this.endExclusive(slotStart);
     this.normalizeSelection();
     this.updatePreview();
-  }
-
-  private slotToDate(day: Date, slotIndex: number): Date {
-    const d = new Date(day);
-    d.setHours(0, 0, 0, 0);
-    d.setMinutes(slotIndex * this.SLOT_MINUTES);
-    return d;
   }
 
   private normalizeSelection(): void {
@@ -230,8 +222,8 @@ export class ItinerarioDetailComponent implements OnInit {
       const duration = (end - start) / 60000;
 
       result[this.dayKey(day)] = [{
-        top: (minutes / this.SLOT_MINUTES) * this.PX_PER_SLOT,
-        height: (duration / this.SLOT_MINUTES) * this.PX_PER_SLOT
+        top: (minutes / Util.SLOT_MINUTES) * Util.PX_PER_SLOT,
+        height: (duration / Util.SLOT_MINUTES) * Util.PX_PER_SLOT
       }];
     }
 
@@ -276,7 +268,7 @@ export class ItinerarioDetailComponent implements OnInit {
     this.days.forEach(d => result[this.dayKey(d)] = []);
 
     this.items.forEach(item => {
-      this.splitItemByDay(item).forEach(segment => {
+      Util.splitItemByDay(item).forEach(segment => {
         const key = this.dayKey(segment.inicio);
         if (result[key]) result[key].push(segment);
       });
@@ -301,7 +293,7 @@ export class ItinerarioDetailComponent implements OnInit {
   }
 
   private endExclusive(date: Date): Date {
-    return new Date(date.getTime() + this.SLOT_MINUTES * 60000);
+    return new Date(date.getTime() + Util.SLOT_MINUTES * 60000);
   }
 
   private reset(): void {
@@ -404,7 +396,7 @@ export class ItinerarioDetailComponent implements OnInit {
       .obtenerItinerario(this.viajeId)
       .subscribe({
         next: itinerario => {
-          this.items = this.mapItinerario(itinerario).map(item => ({
+          this.items = Util.mapItinerario(itinerario).map(item => ({
             ...item,
             inicio: new Date(item.inicio),
             fin: new Date(item.fin)
@@ -419,70 +411,18 @@ export class ItinerarioDetailComponent implements OnInit {
       });
   }
 
+  openDetalle(item: CalendarItem): void {
+    if (this.isSelecting) return;
 
-  private mapItinerario(itinerario: any): ItinerarioItem[] {
-    const actividades = itinerario.actividades.map((a: any) => ({
-      id: a.id,
-      tipo: 'ACTIVIDAD',
-      nombre: a.nombre,
-      inicio: new Date(a.horaInicio),
-      fin: new Date(a.horaFin),
-      duracionMinutos: a.duracionMinutos
-    }));
-
-    const trayectos = itinerario.trayectos.map((t: any) => ({
-      id: t.id,
-      tipo: 'TRAYECTO',
-      nombre: t.nombre,
-      inicio: new Date(t.horaInicio),
-      fin: new Date(t.horaFin),
-      duracionMinutos: t.duracionMinutos,
-      origen: t.origen,
-      destino: t.destino,
-      medioTransporte: t.medioTransporte
-    }));
-
-    return [...actividades, ...trayectos]
-      .sort((a, b) => a.inicio.getTime() - b.inicio.getTime());
+    this.dialogService.open(ItinerarioDetailModalComponent, {
+      header: item.tipo === 'ACTIVIDAD' ? item.nombre : 'Detalle del trayecto', width: '270px',
+      dismissableMask: true, closable: true, closeOnEscape: true, modal: true,
+      data: {
+        item,
+        ciudades: this.ciudadesDelViaje,
+        monedaBase: this.monedaBase
+      }
+    });
   }
-
-  private splitItemByDay(item: ItinerarioItem): CalendarItem[] {
-    const result: CalendarItem[] = [];
-
-    let currentStart = new Date(item.inicio);
-
-    const itemEnd = new Date(item.inicio.getTime() + item.duracionMinutos * 60000);
-
-    while (currentStart < itemEnd) {
-      const dayStart = new Date(currentStart);
-      dayStart.setHours(0, 0, 0, 0);
-
-      const dayEnd = new Date(dayStart);
-      dayEnd.setDate(dayEnd.getDate() + 1);
-
-      const segmentStart = currentStart;
-      const segmentEnd = new Date(Math.min(dayEnd.getTime(), itemEnd.getTime()));
-
-      const minutesFromDayStart =
-        (segmentStart.getTime() - dayStart.getTime()) / 60000;
-
-      const durationMinutes =
-        (segmentEnd.getTime() - segmentStart.getTime()) / 60000;
-
-      result.push({
-        ...item,
-        inicio: new Date(segmentStart),
-        fin: new Date(segmentEnd),
-        top: (minutesFromDayStart / this.SLOT_MINUTES) * this.PX_PER_SLOT,
-        height: (durationMinutes / this.SLOT_MINUTES) * this.PX_PER_SLOT,
-        _uid: crypto.randomUUID()
-      });
-
-      currentStart = segmentEnd;
-    }
-
-    return result;
-  }
-
 
 }

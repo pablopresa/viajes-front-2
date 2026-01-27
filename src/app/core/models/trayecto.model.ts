@@ -12,5 +12,6 @@ export interface Trayecto {
     duracionMinutos: number;
   
     costoEstimado?: number;
+    costo?: number;
   }
   

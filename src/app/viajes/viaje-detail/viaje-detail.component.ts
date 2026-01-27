@@ -8,6 +8,7 @@ import { Observable } from "rxjs";
 import { ButtonModule } from "primeng/button";
 import { CardModule } from "primeng/card";
 import { Viaje } from "../../core/models/viaje.model";
+import { Util } from "../../core/commons/util";
 
 @Component({
   standalone: true,
@@ -29,7 +30,7 @@ export class ViajeDetailComponent {
   constructor(
     private route: ActivatedRoute,
     private viajeService: ViajeService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     const viajeId$ = this.route.paramMap.pipe(
@@ -40,34 +41,10 @@ export class ViajeDetailComponent {
     this.viaje$ = viajeId$.pipe(
       switchMap(id => this.viajeService.obtenerViaje(id))
     );
-  
+
     this.itinerarioItems$ = this.viaje$.pipe(
-      map(v => this.mapItinerario(v.itinerario))
+      map(v => Util.mapItinerario(v.itinerario))
     );
   }
-  
-  private mapItinerario(itinerario: any): ItinerarioItem[] {
-    const actividades = itinerario.actividades.map((a: any) => ({
-      id: a.id,
-      tipo: 'ACTIVIDAD',
-      nombre: a.nombre,
-      inicio: new Date(a.horaInicio),
-      fin: new Date(a.horaFin),
-      duracionMinutos: a.duracionMinutos
-    }));
 
-    const trayectos = itinerario.trayectos.map((t: any) => ({
-      id: t.id,
-      tipo: 'TRAYECTO',
-      nombre: t.nombre,
-      inicio: new Date(t.horaInicio),
-      fin: new Date(t.horaFin),
-      duracionMinutos: t.duracionMinutos,
-      origen: t.origen,
-      destino: t.destino
-    }));
-
-    return [...actividades, ...trayectos]
-      .sort((a, b) => a.inicio.getTime() - b.inicio.getTime());
-  }
 }

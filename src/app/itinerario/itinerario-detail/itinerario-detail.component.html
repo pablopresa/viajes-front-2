@@ -80,7 +80,9 @@
 
         <!-- Items -->
         @for (item of itemsByDay[dayKey(day)]; track item._uid) {
-        <div class="item" [ngClass]="item.tipo" [style.top.px]="item.top" [style.height.px]="item.height">
+        <div class="item" [ngClass]="item.tipo" [style.top.px]="item.top" [style.height.px]="item.height"
+          (click)="openDetalle(item)">
+
 
           @if (item.tipo === 'ACTIVIDAD') {
           <strong>{{ item.nombre }}</strong>
