@@ -19,6 +19,7 @@ import { Trayecto } from '../../core/models/trayecto.model';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { Util } from '../../core/commons/util';
+import { ViajeService } from '../../core/services/viaje.service';
 
 interface CalendarItem extends ItinerarioItem {
   top: number;
@@ -65,12 +66,14 @@ export class ItinerarioDetailComponent implements OnInit {
   viajeFin!: Date;
   monedaBase!: string;
   viajeId!: number;
+  ciudadesDelViaje: { label: string; value: number }[] = [];
 
   readonly START_HOUR = 0;
   readonly END_HOUR = 23;
   readonly SLOT_MINUTES = 30;
   readonly PX_PER_SLOT = 24;
 
+  private viajeService = inject(ViajeService);
   private location = inject(Location);
   private dialogService = inject(DialogService);
   private itinerarioService = inject(ItinerarioService);
@@ -92,6 +95,13 @@ export class ItinerarioDetailComponent implements OnInit {
       monedaBase?: string;
     };
 
+    this.viajeService.obtenerCiudades(this.viajeId).subscribe(ciudades => {
+      this.ciudadesDelViaje = ciudades.map(c => ({
+        label: `${c.nombre}`,
+        value: c.id
+      }));
+    });
+
     if (!state?.fechaInicio || !state?.fechaFin) {
       this.reset();
       return;
@@ -105,12 +115,18 @@ export class ItinerarioDetailComponent implements OnInit {
     this.items = (state.itinerario ?? []).map(item => ({
       ...item,
       inicio: new Date(item.inicio),
-      fin: new Date(item.fin)
+      fin: new Date(item.fin),
+      origen: item.origen,
+      destion: item.destino
     }));
 
     this.buildDaysFromViaje();
     this.buildHours();
     this.mapItems();
+  }
+
+  public obtenerNombreCiudad(ciudadId: any): string | undefined {
+    return this.ciudadesDelViaje.find((x: any) => x.value == ciudadId)?.label;
   }
 
   goBack(): void {
@@ -318,7 +334,8 @@ export class ItinerarioDetailComponent implements OnInit {
       data: {
         inicio: this.selectionStart,
         fin: this.selectionEnd,
-        monedaBase: this.monedaBase
+        monedaBase: this.monedaBase,
+        ciudades: this.ciudadesDelViaje
       }
     });
 
@@ -353,7 +370,8 @@ export class ItinerarioDetailComponent implements OnInit {
       data: {
         inicio: this.selectionStart,
         fin: this.selectionEnd,
-        monedaBase: this.monedaBase
+        monedaBase: this.monedaBase,
+        ciudades: this.ciudadesDelViaje
       }
     });
 

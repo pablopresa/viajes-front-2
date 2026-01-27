@@ -6,6 +6,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { ButtonModule } from 'primeng/button';
 import { TextareaModule } from 'primeng/textarea';
+import { SelectModule } from 'primeng/select';
 
 @Component({
   selector: 'app-actividad-form',
@@ -16,7 +17,8 @@ import { TextareaModule } from 'primeng/textarea';
     InputTextModule,
     InputNumberModule,
     TextareaModule,
-    ButtonModule
+    ButtonModule,
+    SelectModule
   ],
   templateUrl: './actividad-form.component.html',
   styleUrl: './actividad-form.component.css'
@@ -30,10 +32,11 @@ export class ActividadFormComponent {
   readonly inicio: Date = this.config.data.inicio;
   readonly fin: Date = this.config.data.fin;
   readonly monedaBase: string = this.config.data.monedaBase;
+  readonly ciudades = this.config.data.ciudades as { label: string; value: number; }[];
 
   form = this.fb.nonNullable.group({
     nombre: ['', Validators.required],
-    ubicacion: [''],
+    ciudadId: [null as number | null, Validators.required],
     duracionMinutos: [
       this.calcularDuracion(),
       [Validators.required, Validators.min(1)]
@@ -61,14 +64,13 @@ export class ActividadFormComponent {
       fecha,
       horaInicio,
       duracionMinutos: this.form.controls.duracionMinutos.value,
-      ubicacion: this.form.controls.ubicacion.value ?? '',
+      ubicacion: this.form.controls.ciudadId.value ?? '',
       costo: null,
       descripcion: this.form.controls.descripcion.value ?? '',
       costoEstimado: this.form.controls.costoEstimado.value,
       tipo: 'ACTIVIDAD'
     };
   }
-
   cancelar(): void {
     this.dialogRef.close(null);
   }
@@ -79,11 +81,11 @@ export class ActividadFormComponent {
     const d = String(date.getDate()).padStart(2, '0');
     return `${y}-${m}-${d}`;
   }
-  
+
   private formatDateTimeLocal(date: Date): string {
     const h = String(date.getHours()).padStart(2, '0');
     const min = String(date.getMinutes()).padStart(2, '0');
     return `${this.formatDateLocal(date)}T${h}:${min}`;
   }
-  
+
 }

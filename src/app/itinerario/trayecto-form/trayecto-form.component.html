@@ -9,13 +9,17 @@
         </div>
 
         <div class="col-12">
-            <label for="origen">Origen *</label>
-            <input id="origen" pInputText formControlName="origen" autofocus />
+            <label>Origen *</label>
+            <p-select formControlName="origenCiudadId" [options]="ciudades" optionLabel="label" optionValue="value"
+                placeholder="Seleccione origen">
+            </p-select>
         </div>
 
         <div class="col-12">
-            <label for="destino">Destino *</label>
-            <input id="destino" pInputText formControlName="destino" />
+            <label>Destino *</label>
+            <p-select formControlName="destinoCiudadId" [options]="ciudades" optionLabel="label" optionValue="value"
+                placeholder="Seleccione destino">
+            </p-select>
         </div>
 
 

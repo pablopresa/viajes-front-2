@@ -87,7 +87,7 @@
           }
 
           @if (item.tipo === 'TRAYECTO') {
-          <small>{{ item.origen }} → {{ item.destino }}</small>
+          <small>{{ obtenerNombreCiudad(item.origen) }} → {{ obtenerNombreCiudad(item.destino) }}</small>
           }
         </div>
         }

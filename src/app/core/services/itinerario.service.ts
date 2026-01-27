@@ -4,7 +4,6 @@ import { Observable } from 'rxjs';
 
 import { Itinerario } from '../models/itinerario.model';
 import { Actividad } from '../models/actividad.model';
-import { Trayecto } from '../models/trayecto.model';
 import { ItinerarioItem } from '../models/itinerario-item';
 
 @Injectable({ providedIn: 'root' })

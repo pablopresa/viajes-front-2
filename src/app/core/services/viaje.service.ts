@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Viaje } from '../models/viaje.model';
 import { CrearViajeRequest } from '../models/crear-viaje-request';
+import { Ciudad } from '../models/ciudad';
 
 @Injectable({ providedIn: 'root' })
 export class ViajeService {
@@ -22,5 +23,9 @@ export class ViajeService {
 
   obtenerViaje(id: number): Observable<Viaje> {
     return this.http.get<Viaje>(`${this.apiUrl}/${id}`);
+  }
+
+  obtenerCiudades(id: number): Observable<Ciudad[]> {
+    return this.http.get<Ciudad[]>(`${this.apiUrl}/${id}/ciudades`);
   }
 }

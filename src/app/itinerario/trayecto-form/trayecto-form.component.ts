@@ -31,6 +31,7 @@ export class TrayectoFormComponent {
   readonly inicio: Date = this.config.data.inicio;
   readonly fin: Date = this.config.data.fin;
   readonly monedaBase: string = this.config.data.monedaBase;
+  readonly ciudades = this.config.data.ciudades as { label: string; value: number; }[];
 
   mediosDeTransporte = [
     { label: 'Avión', value: 'AVION' },
@@ -40,19 +41,13 @@ export class TrayectoFormComponent {
     { label: 'Pie', value: 'PIE' },
   ];
 
-  form = this.fb.nonNullable.group({
-    nombre: [''],
-    ubicacion: [''],
-    origen: ['', Validators.required],
-    destino: ['', Validators.required],
-    medioTransporte: ['', Validators.required],
-    duracionMinutos: [
-      this.calcularDuracion(),
-      [Validators.required, Validators.min(1)]
-    ],
-    costoEstimado: [null as number | null],
-    descripcion: ['']
-  });
+form = this.fb.nonNullable.group({
+  medioTransporte: ['', Validators.required],
+  origenCiudadId: [null as number | null, Validators.required],
+  destinoCiudadId: [null as number | null, Validators.required],
+  duracionMinutos: [this.calcularDuracion(), Validators.min(1)],
+  costoEstimado: [null as number | null],
+});
 
   private calcularDuracion(): number {
     const diffMs = this.fin.getTime() - this.inicio.getTime();
@@ -67,25 +62,29 @@ export class TrayectoFormComponent {
   private buildActividad() {
     const fecha = this.formatDateLocal(this.inicio);
     const horaInicio = this.formatDateTimeLocal(this.inicio);
-  
+
     return {
       nombre: this.obtenerNombre(),
       fecha,
       horaInicio,
       duracionMinutos: this.form.controls.duracionMinutos.value,
-      ubicacion: this.form.controls.ubicacion.value ?? '',
       costo: null,
       descripcion: this.obtenerNombre(),
       costoEstimado: this.form.controls.costoEstimado.value,
-      origen: this.form.controls.origen.value,
-      destino: this.form.controls.destino.value,
+      origen: this.form.controls.origenCiudadId.value,
+      destino: this.form.controls.destinoCiudadId.value,
       tipo: 'TRAYECTO'
     };
   }
 
-  private obtenerNombre(): string{
-    return this.form.controls.medioTransporte.value + ' de ' + this.form.controls.origen.value + ' a ' + this.form.controls.destino.value;
+  private obtenerNombre(): string {
+    return this.form.controls.medioTransporte.value + ' de ' + this.obtenerNombreCiudad(this.form.controls.origenCiudadId.value) + ' a ' + this.obtenerNombreCiudad(this.form.controls.destinoCiudadId.value);
   }
+
+  private obtenerNombreCiudad(ciudadId: number | null): string | undefined{
+    return this.ciudades.find((x: any) => x.value == ciudadId)?.label;
+  }
+
 
   cancelar(): void {
     this.dialogRef.close(null);
@@ -97,11 +96,11 @@ export class TrayectoFormComponent {
     const d = String(date.getDate()).padStart(2, '0');
     return `${y}-${m}-${d}`;
   }
-  
+
   private formatDateTimeLocal(date: Date): string {
     const h = String(date.getHours()).padStart(2, '0');
     const min = String(date.getMinutes()).padStart(2, '0');
     return `${this.formatDateLocal(date)}T${h}:${min}`;
   }
-  
+
 }

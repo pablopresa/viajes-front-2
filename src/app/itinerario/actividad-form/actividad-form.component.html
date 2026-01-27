@@ -4,62 +4,36 @@
 
     <div class="col-12">
       <label for="nombre">Nombre *</label>
-      <input
-        id="nombre"
-        pInputText
-        formControlName="nombre"
-      />
+      <input id="nombre" pInputText formControlName="nombre" />
     </div>
 
     <div class="col-12">
-      <label for="ubicacion">Ubicación</label>
-      <input
-        id="ubicacion"
-        pInputText
-        formControlName="ubicacion"
-      />
+      <label>Ubicación</label>
+      <p-select formControlName="ciudadId" [options]="ciudades" optionLabel="label" optionValue="value"
+        placeholder="Seleccione destino">
+      </p-select>
     </div>
 
     <div class="col-12 md:col-4">
       <label for="costo">Costo estimado</label>
-      <p-inputNumber
-        inputId="costo"
-        formControlName="costoEstimado"
-        mode="currency"
-        [currency]="monedaBase"
-        [showButtons]="false"
-        [min]="0">
+      <p-inputNumber inputId="costo" formControlName="costoEstimado" mode="currency" [currency]="monedaBase"
+        [showButtons]="false" [min]="0">
       </p-inputNumber>
     </div>
 
     <div class="col-12">
       <label for="descripcion">Descripción (Opcional)</label>
-      <textarea
-        id="descripcion"
-        pTextarea
-        rows="2"
-        formControlName="descripcion">
+      <textarea id="descripcion" pTextarea rows="2" formControlName="descripcion">
       </textarea>
     </div>
 
   </div>
 
   <div class="form-actions">
-    <button
-      pButton
-      type="button"
-      label="Cancelar"
-      class="p-button-text p-button-sm"
-      (click)="cancelar()">
+    <button pButton type="button" label="Cancelar" class="p-button-text p-button-sm" (click)="cancelar()">
     </button>
 
-    <button
-      pButton
-      type="submit"
-      label="Guardar"
-      icon="pi pi-check"
-      class="p-button-sm"
-      (click)="guardar()"
+    <button pButton type="submit" label="Guardar" icon="pi pi-check" class="p-button-sm" (click)="guardar()"
       [disabled]="form.invalid">
     </button>
   </div>

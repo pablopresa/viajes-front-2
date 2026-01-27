@@ -4,7 +4,7 @@
     <!-- Nombre -->
     <div class="field">
       <label for="nombre">Nombre del viaje</label>
-      <input id="nombre" pInputText type="text" formControlName="nombre" placeholder="Ej: Europa 2026" class="w-full" />
+      <input id="nombre" pInputText type="text" formControlName="nombre" placeholder="Ej: Vacaciones en familia" class="w-full" />
     </div>
 
     <!-- Fechas -->
@@ -30,18 +30,22 @@
           optionValue="value" placeholder="Seleccione moneda" class="w-full"></p-select>
       </div>
 
+      <!-- Ciudades -->
       <div class="field">
-        <label for="tipoCambio">Tipo de cambio</label>
-        <p-inputNumber id="tipoCambio" formControlName="tipoCambio" [minFractionDigits]="2" [maxFractionDigits]="2"
-          class="w-full"></p-inputNumber>
+        <label for="ciudades">Ciudades a visitar</label>
+        <p-multiSelect formControlName="ciudades" [options]="ciudadesAgrupadas" optionGroupLabel="label"
+          optionGroupChildren="items" optionLabel="label" optionValue="value" filter="true" display="chip"
+          placeholder="Buscar ciudad" [group]="true" class="w-full">
+        </p-multiSelect>
+
       </div>
     </div>
 
     <!-- Presupuesto -->
     <div class="field">
       <label for="presupuestoTotal">Presupuesto total</label>
-      <p-inputNumber id="presupuestoTotal" formControlName="presupuestoTotal" mode="currency" [currency]="form.value.monedaBase"
-        locale="es-UY" class="w-full"></p-inputNumber>
+      <p-inputNumber id="presupuestoTotal" formControlName="presupuestoTotal" mode="currency"
+        [currency]="form.value.monedaBase" locale="es-UY" class="w-full"></p-inputNumber>
     </div>
 
     <!-- Rigidez -->
