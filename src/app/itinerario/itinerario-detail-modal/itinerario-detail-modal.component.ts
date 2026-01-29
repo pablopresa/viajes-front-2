@@ -1,29 +1,33 @@
 import { CommonModule } from "@angular/common";
-import { Component } from "@angular/core";
+import { Component, inject, OnInit } from "@angular/core";
 import { ButtonModule } from "primeng/button";
 import { DynamicDialogRef, DynamicDialogConfig } from "primeng/dynamicdialog";
 import { ItinerarioItem } from "../../core/models/itinerario-item";
 import { Util } from "../../core/commons/util";
+import { FileUpload, FileUploadModule } from 'primeng/fileupload';
+import { ViewChild } from '@angular/core';
+import { ItinerarioService } from "../../core/services/itinerario.service";
 
 @Component({
   selector: 'app-itinerario-detalle-modal',
   standalone: true,
   imports: [
     CommonModule,
-    ButtonModule
+    ButtonModule,
+    FileUploadModule
   ],
   templateUrl: './itinerario-detail-modal.component.html'
 })
 export class ItinerarioDetailModalComponent {
 
+  @ViewChild('fileUploader') fileUploader!: FileUpload;
+
   item!: ItinerarioItem;
   ciudades: { label: string; value: number }[] = [];
   monedaBase!: string;
 
-  constructor(
-    public ref: DynamicDialogRef,
-    public config: DynamicDialogConfig
-  ) {
+  itinerarioService = inject(ItinerarioService);
+  constructor(public ref: DynamicDialogRef, public config: DynamicDialogConfig) {
     this.item = config.data.item;
     this.ciudades = config.data.ciudades;
     this.monedaBase = config.data.monedaBase;
@@ -38,7 +42,7 @@ export class ItinerarioDetailModalComponent {
   }
 
   adjuntarArchivo(): void {
-    console.log('Adjuntar archivo');
+    this.fileUploader.choose();
   }
 
   public obtenerNombreCiudad(ciudadId: any): string | undefined {
@@ -64,4 +68,55 @@ export class ItinerarioDetailModalComponent {
     const ret = Util.capitalize(texto ?? '');
     return ret;
   }
+
+  onFileSelected(event: any): void {
+    const file: File = event.files[0];
+
+    if (!file) {
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('tipo', this.item.tipo); // ACTIVIDAD | TRAYECTO
+    formData.append('refId', this.item.id.toString());
+
+    this.itinerarioService.agregarAdjunto(formData).subscribe({
+      next: resp => this.ref.close(resp),
+      error: err => {
+        if (err.status === 400) {
+          alert(err.error);
+        }
+      }
+    });
+  }
+
+  public descargarAdjunto(adjuntoId: number): void {
+    this.itinerarioService.descargarAdjunto(adjuntoId).subscribe(resp => {
+
+      const blob = resp.body!;
+      // Obtener nombre desde el header
+      const contentDisposition = resp.headers.get('content-disposition');
+      let fileName = 'archivo';
+
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename\*?=(?:UTF-8''|")?([^";\n]+)/i);
+        if (match && match[1]) {
+          fileName = decodeURIComponent(match[1]);
+        }
+      }
+
+      console.log("Descargando archivo con nombre " + fileName);
+
+      // Crear link y disparar descarga
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      a.click();
+
+      window.URL.revokeObjectURL(url);
+    });
+  }
+
 }

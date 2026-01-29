@@ -12,5 +12,5 @@ export interface ItinerarioItem {
   costo?: number;
   costoEstimado?: number;
   medioTransporte?: string;
-  adjuntoUrl?: string;
+  adjuntoId?: number;
 }

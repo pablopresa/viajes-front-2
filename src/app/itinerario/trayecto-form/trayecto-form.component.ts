@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, Validators, ReactiveFormsModule, NonNullableFormBuilder } from '@angular/forms';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
@@ -26,12 +26,25 @@ export class TrayectoFormComponent {
 
   private fb = inject(FormBuilder);
   private dialogRef = inject(DynamicDialogRef);
-  private config = inject(DynamicDialogConfig);
 
-  readonly inicio: Date = this.config.data.inicio;
-  readonly fin: Date = this.config.data.fin;
-  readonly monedaBase: string = this.config.data.monedaBase;
+  readonly inicio!: Date;
+  readonly fin!: Date;
+  readonly monedaBase!: string;
   readonly ciudades = this.config.data.ciudades as { label: string; value: number; }[];
+  form!: any;
+
+  constructor(private config: DynamicDialogConfig) {
+    this.inicio = config.data.inicio;
+    this.fin = config.data.fin;
+    this.monedaBase = config.data.monedaBase;
+    this.form = this.fb.nonNullable.group({
+    medioTransporte: ['', Validators.required],
+    origenCiudadId: [null as number | null, Validators.required],
+    destinoCiudadId: [null as number | null, Validators.required],
+    duracionMinutos: [this.calcularDuracion(), Validators.min(1)],
+    costoEstimado: [null as number | null],
+  });
+  }
 
   mediosDeTransporte = [
     { label: 'Avión', value: 'AVION' },
@@ -40,14 +53,6 @@ export class TrayectoFormComponent {
     { label: 'Barco', value: 'BARCO' },
     { label: 'Pie', value: 'PIE' },
   ];
-
-form = this.fb.nonNullable.group({
-  medioTransporte: ['', Validators.required],
-  origenCiudadId: [null as number | null, Validators.required],
-  destinoCiudadId: [null as number | null, Validators.required],
-  duracionMinutos: [this.calcularDuracion(), Validators.min(1)],
-  costoEstimado: [null as number | null],
-});
 
   private calcularDuracion(): number {
     const diffMs = this.fin.getTime() - this.inicio.getTime();
@@ -82,7 +87,7 @@ form = this.fb.nonNullable.group({
     return this.form.controls.medioTransporte.value + ' de ' + this.obtenerNombreCiudad(this.form.controls.origenCiudadId.value) + ' a ' + this.obtenerNombreCiudad(this.form.controls.destinoCiudadId.value);
   }
 
-  private obtenerNombreCiudad(ciudadId: number | null): string | undefined{
+  private obtenerNombreCiudad(ciudadId: number | null): string | undefined {
     return this.ciudades.find((x: any) => x.value == ciudadId)?.label;
   }
 

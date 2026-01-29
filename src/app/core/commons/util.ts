@@ -49,7 +49,7 @@ export class Util {
                 fin: new Date(segmentEnd),
                 top: (minutesFromDayStart / this.SLOT_MINUTES) * this.PX_PER_SLOT,
                 height: (durationMinutes / this.SLOT_MINUTES) * this.PX_PER_SLOT,
-                _uid: crypto.randomUUID()
+                _uid: crypto.randomUUID?.() ?? Util.uuidFallback()
             });
 
             currentStart = segmentEnd;
@@ -76,7 +76,7 @@ export class Util {
             duracionMinutos: a.duracionMinutos,
             costo: a.costo,
             costoEstimado: a.costoEstimado,
-            adjuntoUrl: a.adjuntoUrl
+            adjuntoId: a.adjuntoId
         }));
 
         const trayectos = itinerario.trayectos.map((t: any) => ({
@@ -91,11 +91,20 @@ export class Util {
             origen: t.origen,
             destino: t.destino,
             medioTransporte: t.medioTransporte,
-            adjuntoUrl: t.adjuntoUrl
+            adjuntoId: t.adjuntoId
         }));
 
         return [...actividades, ...trayectos]
             .sort((a, b) => a.inicio.getTime() - b.inicio.getTime());
     }
+
+    public static uuidFallback(): string {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+            const r = Math.random() * 16 | 0;
+            const v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
 
 }

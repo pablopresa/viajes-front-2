@@ -9,7 +9,7 @@ import { Ciudad } from '../models/ciudad';
 export class ViajeService {
 
   // private readonly apiUrl = '/api/viajes';
-  private readonly apiUrl = 'http://localhost:8080/api/viajes';
+  private readonly apiUrl = 'http://192.168.1.4:8080/api/viajes';
 
   constructor(private http: HttpClient) {}
 

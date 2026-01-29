@@ -18,6 +18,12 @@ export const appConfig: ApplicationConfig = {
         options: {
           darkModeSelector: false
         }
+      },
+      translation: {
+        noFileChosenMessage: 'Ningún archivo seleccionado',
+        choose: 'Seleccionar',
+        upload: 'Subir',
+        cancel: 'Cancelar'
       }
     })
   ]

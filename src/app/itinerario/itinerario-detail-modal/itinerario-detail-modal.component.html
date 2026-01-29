@@ -1,4 +1,5 @@
 @let costo = item.costo ? item.costo : item.costoEstimado;
+<!-- @let costoEsEstimado = item.costoEstimado!! && !item.costo!!; -->
 
 <div class="detalle-container">
 
@@ -15,14 +16,20 @@
   <p><strong>Inicio:</strong> {{ item.inicio | date:'dd/MM/yyyy HH:mm' }}</p>
   <p><strong>Duración:</strong> {{ obtenerDuracionString(item.duracionMinutos) }}</p>
   <p><strong>Costo:</strong> {{ costo ? costo + ' ' + monedaBase : '-' }}</p>
+  <!-- @if(costoEsEstimado){
+  El costo es estimado
+  } -->
 
   <div class="archivo">
-    @if (item.adjuntoUrl) {
-    <a [href]="item.adjuntoUrl" target="_blank">
-      Descargar adjunto
-    </a>
-    } @else {
-    <button pButton label="Adjuntar archivo" icon="pi pi-upload" (click)="adjuntarArchivo()"></button>
+    @if (item.adjuntoId) {
+        <button pButton type="button" label="Descargar adjunto" class="p-button-text" (click)="descargarAdjunto(item.adjuntoId)">
+        </button>
+    }
+    @else {
+    <p-fileUpload #fileUploader mode="basic" name="archivo" accept=".pdf,.jpg,.png" [customUpload]="true" [auto]="false"
+      [maxFileSize]="10000000" (onSelect)="onFileSelected($event)" chooseIcon="pi pi-upload"
+      chooseLabel="Adjuntar archivo">
+    </p-fileUpload>
     }
   </div>
 

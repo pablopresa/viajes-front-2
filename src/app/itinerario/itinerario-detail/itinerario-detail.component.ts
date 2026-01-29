@@ -105,7 +105,7 @@ export class ItinerarioDetailComponent implements OnInit {
     this.viajeInicio = Util.parseLocalDate(state.fechaInicio);
     this.viajeFin = Util.parseLocalDate(state.fechaFin);
 
-    this.monedaBase = state.monedaBase ?? '';
+    this.monedaBase = state.monedaBase ?? 'USD';
 
     this.items = (state.itinerario ?? []).map(item => ({
       ...item,
@@ -116,7 +116,7 @@ export class ItinerarioDetailComponent implements OnInit {
       medioTransporte: item.medioTransporte,
       costo: item.costo,
       costoEstimado: item.costoEstimado,
-      adjuntoUrl: item.adjuntoUrl
+      adjuntoId: item.adjuntoId
     }));
 
     this.buildDaysFromViaje();
@@ -421,6 +421,11 @@ export class ItinerarioDetailComponent implements OnInit {
         item,
         ciudades: this.ciudadesDelViaje,
         monedaBase: this.monedaBase
+      }
+    })?.onClose.subscribe(adjunto => {
+      if (adjunto) {
+        // actualizar UI
+        item.adjuntoId = adjunto.id;
       }
     });
   }

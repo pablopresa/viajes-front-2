@@ -11,15 +11,26 @@ import { Trayecto } from '../models/trayecto.model';
 export class ItinerarioService {
 
   // private readonly apiUrl = '/api/viajes';
-  private readonly apiUrl = 'http://localhost:8080/api/viajes';
+  private readonly apiUrl = 'http://192.168.1.4:8080/api';
 
   constructor(private http: HttpClient) { }
 
   obtenerItinerario(viajeId: number): Observable<Itinerario> {
-    return this.http.get<Itinerario>(`${this.apiUrl}/${viajeId}/itinerario`);
+    return this.http.get<Itinerario>(`${this.apiUrl}/viajes/${viajeId}/itinerario`);
   }
 
-  crearActividad(actividad: Actividad | Trayecto, viajeId: number): Observable<ItinerarioItem> {
-    return this.http.post<ItinerarioItem>(`${this.apiUrl}/${viajeId}/actividades`, actividad);
+  crearActividad(item: Actividad | Trayecto, viajeId: number): Observable<ItinerarioItem> {
+    return this.http.post<ItinerarioItem>(`${this.apiUrl}/viajes/${viajeId}/actividades`, item);
+  }
+
+  agregarAdjunto(form: FormData): Observable<any> {
+    return this.http.post( `${this.apiUrl}/adjuntos`, form);
+  }
+
+  descargarAdjunto(adjuntoId: number): Observable<any> {
+    return this.http.get(
+      `${this.apiUrl}/adjuntos/${adjuntoId}`,
+      { responseType: 'blob', observe: 'response' }
+    );
   }
 }
